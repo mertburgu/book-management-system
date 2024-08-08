@@ -2,14 +2,18 @@
 
 ## Proje Açıklaması
 
-Book Management System, kullanıcıların kitapları yönetebileceği, kitaplara inceleme ve puan verebileceği, okudukları kitapları kaydedebileceği bir uygulamadır. Proje, kullanıcı yönetimi, güvenlik, ve CRUD işlemleri gibi temel işlevleri içerir.
+Book Management System, kullanıcıların kitaplara inceleme ve puan ekleyebildiği, kendi kütüphanelerini düzenleyip public/private olarak listeleyebildiği bir uygulamadır. 
+Editör ve admin rolleri ile de kitapların yönetimi yapılmaktadır.
+Proje, kullanıcı yönetimi, güvenlik, ve CRUD işlemleri gibi temel işlevleri içerir.
 
 ## Gereksinimler
 
-- Go 1.18 veya daha yeni bir sürüm
-- SQLite (varsayılan veritabanı)
+- Go 1.22
+- PostgreSQL 14.12
+- Docker version 27.1.1
 
 ## Kurulum ve Çalıştırma
+
 
 1. **Proje:**
 
@@ -17,46 +21,82 @@ Book Management System, kullanıcıların kitapları yönetebileceği, kitaplara
    git clone git@github.com:mertburgu/book-management-system.git
    cd book-management-system
 
+
 2. **Go Modüllerini Yükleme:**
 
    ```bash
    go mod download
 
+
 3. **Veritabanını Başlatın:**
 
-    Veritabanı otomatik olarak başlatılır ve book_management.db dosyası proje kök dizininde oluşturulur.
+    Veritabanı docker ile otomatik olarak başlatılır 
+
+    database:book_management
+
+    user:user
+ 
+    password:password
+ 
+    host:localhost
+
+    port:5432
 
 
-4. **Proje Yapılandırmasını Yapın:**
-
-    config/database.go dosyasında veritabanı bağlantı ayarlarını kontrol edin.
-
-
-5. **Projeyi Çalıştırma:**
+4. **Projeyi Çalıştırma:**
 
    ```bash
-   go run cmd/main.go
+   docker-compose build
+   docker-compose up -d
 
-6. **Kullanım**
 
-   
+5. **Kullanım**
+
    Kullanıcı Kaydı: POST /register endpoint'ini kullanarak yeni kullanıcılar oluşturabilirsiniz.
-    
+   ```bash
+   POST
+   http://localhost:8082/register
+   
+   Request Headers
+   Content-Type application/vnd.api+json
+   Body raw json
+   {
+       "username": "testuser",
+       "password": "testpassword",
+       "email": "testuser@example.com",
+       "name": "Test",
+       "surname": "User",
+       "phone": "1234567890"
+   }
+   ```
    
    Kullanıcı Girişi: POST /login endpoint'ini kullanarak kullanıcılar giriş yapabilir ve JWT token alabilir.
-    
    
-   Kitap Ekleme: POST /books endpoint'ini kullanarak kitap ekleyebilirsiniz (JWT token gerekli).
+   ```bash
+      POST
+      http://localhost:8082/login
+   
+      Request Headers
+      Content-Type application/vnd.api+json
+      Body raw json
+      {
+      "username": "testuser",
+      "password": "testpassword",
+      }
+      
+      RESPONSE
+      {
+       "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjMxOTc4MDUsImlkIjoiNTJkZGUwM2QtMDk1My00ZTFiLWI2OTMtOWIxMjhkZjBhMWIyIiwicm9sZSI6InVzZXIifQ.kl9aYsKZw1h33w7GpTNpD2Y1Q9OelylWrcd2aGegOXE"
+      }
+   ```
+   
+[comment]: <> (   Kitap Ekleme: POST /books endpoint'ini kullanarak kitap ekleyebilirsiniz &#40;JWT token gerekli&#41;.)
 
    
-   Kitap Listeleme: GET /books endpoint'ini kullanarak kitapları listeleyebilirsiniz (JWT token gerekli).
+[comment]: <> (   Kitap Listeleme: GET /books endpoint'ini kullanarak kitapları listeleyebilirsiniz &#40;JWT token gerekli&#41;.)
       
    
-   Kitap Güncelleme: PUT /books/:id endpoint'ini kullanarak bir kitabı güncelleyebilirsiniz (JWT token gerekli).
+[comment]: <> (   Kitap Güncelleme: PUT /books/:id endpoint'ini kullanarak bir kitabı güncelleyebilirsiniz &#40;JWT token gerekli&#41;.)
    
    
-   Kitap Silme: DELETE /books/:id endpoint'ini kullanarak bir kitabı silebilirsiniz (JWT token gerekli).
-
-curl -X POST http://localhost:8082/login -H "Content-Type: application/json" -d '{"username":"testuser", "password":"password"}'
-
-curl -X POST http://localhost:8082/books -H "Authorization: Bearer YOUR_TOKEN" -H "Content-Type: application/json" -d '{"title":"The Great Gatsby", "author":"F. Scott Fitzgerald"}'
+[comment]: <> (   Kitap Silme: DELETE /books/:id endpoint'ini kullanarak bir kitabı silebilirsiniz &#40;JWT token gerekli&#41;.)

@@ -15,7 +15,7 @@ func RegisterRoutes(r *gin.Engine) {
     {
         authorized.GET("/books", controller.GetBooks)
         authorized.POST("/books", controller.CreateBook)
-        authorized.PUT("/books/:id", controller.UpdateBook)
-        authorized.DELETE("/books/:id", controller.DeleteBook)
+//         authorized.PUT("/books/:id", controller.UpdateBook)
+//         authorized.DELETE("/books/:id", controller.DeleteBook)
     }
 }

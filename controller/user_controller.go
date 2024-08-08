@@ -1,39 +1,66 @@
 package controller
 
 import (
-    "github.com/gin-gonic/gin"
-    "github.com/dgrijalva/jwt-go"
-    "net/http"
-    "time"
-    "github.com/mertburgu/book-management-system/model"
+	"net/http"
+	"github.com/gin-gonic/gin"
+	"github.com/mertburgu/book-management-system/model"
+	"github.com/mertburgu/book-management-system/config"
+	"github.com/mertburgu/book-management-system/utils"
 )
 
-const jwtSecret = "your-secret-key"
-
-// Register handler
+// Register handles user registration
 func Register(c *gin.Context) {
-    // User registration logic
+	var user model.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	// Hash password
+	hash, err := config.HashPassword(user.Password)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
+		return
+	}
+	user.Password = hash
+	user.Role = model.RoleUser // Default role
+
+	// Save user
+	if err := config.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
 
-// Login handler
+// Login handles user login
 func Login(c *gin.Context) {
-    var user model.User
-    if err := c.ShouldBindJSON(&user); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
+	var loginData struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	if err := c.ShouldBindJSON(&loginData); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
 
-    // Validate user and create token
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-        "username": user.Username,
-        "exp":      time.Now().Add(time.Hour * 1).Unix(),
-    })
+	var user model.User
+	if err := config.DB.Where("username = ?", loginData.Username).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials."})
+		return
+	}
 
-    tokenString, err := token.SignedString([]byte(jwtSecret))
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
+	if !config.CheckPasswordHash(loginData.Password, user.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
 
-    c.JSON(http.StatusOK, gin.H{"token": tokenString})
+	token, err := utils.GenerateToken(user.ID.String(), user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating token"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }

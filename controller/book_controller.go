@@ -5,7 +5,7 @@ import (
     "github.com/mertburgu/book-management-system/service"
     "github.com/mertburgu/book-management-system/model"
     "net/http"
-    "strconv"
+//     "strconv"
 )
 
 func CreateBook(c *gin.Context) {
@@ -30,7 +30,7 @@ func GetBooks(c *gin.Context) {
     c.JSON(http.StatusOK, books)
 }
 
-func GetBook(c *gin.Context) {
+/* func GetBook(c *gin.Context) {
     id, _ := strconv.Atoi(c.Param("id"))
     book, err := service.GetBookByID(uint(id))
     if err != nil {
@@ -38,9 +38,9 @@ func GetBook(c *gin.Context) {
         return
     }
     c.JSON(http.StatusOK, book)
-}
+} */
 
-func UpdateBook(c *gin.Context) {
+/* func UpdateBook(c *gin.Context) {
     id, _ := strconv.Atoi(c.Param("id"))
     var book model.Book
     if err := c.ShouldBindJSON(&book); err != nil {
@@ -53,8 +53,9 @@ func UpdateBook(c *gin.Context) {
         return
     }
     c.JSON(http.StatusOK, book)
-}
+} */
 
+/*
 func DeleteBook(c *gin.Context) {
     id, _ := strconv.Atoi(c.Param("id"))
     if err := service.DeleteBook(uint(id)); err != nil {
@@ -63,3 +64,4 @@ func DeleteBook(c *gin.Context) {
     }
     c.JSON(http.StatusNoContent, nil)
 }
+ */
